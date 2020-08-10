@@ -1,16 +1,27 @@
 package ru.tsar.formula1;
 
-import java.time.LocalTime;
+import java.time.Duration;
 
 public class Racer {
+	
 	public String name;
 	public String team;
-	public LocalTime bestTime;
+	public Duration bestTime;
+	public Integer place;
 
-	public Racer(String name, String team, LocalTime bestTime) {
+	public Integer getPlace() {
+		return place;
+	}
+
+	public void setPlace(Integer place) {
+		this.place = place;
+	}
+
+	public Racer(String name, String team, Duration bestTime) {
 		this.name = name;
 		this.team = team;
 		this.bestTime = bestTime;
+		this.place = 0;
 	}
 
 	@Override
@@ -71,11 +82,11 @@ public class Racer {
 		this.team = team;
 	}
 
-	public LocalTime getBestTime() {
+	public Duration getBestTime() {
 		return bestTime;
 	}
 
-	public void setBestTime(LocalTime bestTime) {
+	public void setBestTime(Duration bestTime) {
 		this.bestTime = bestTime;
 	}
 
