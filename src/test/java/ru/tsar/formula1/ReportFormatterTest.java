@@ -19,7 +19,7 @@ class ReportFormatterTest {
 
 	@Test
 	void givenNull_whenFormat_thenIllegalArgumentException(){
-		assertThrows(IllegalArgumentException.class, () -> formatter.format(null));
+		assertThrows(IllegalArgumentException.class, () -> formatter.format(null,1));
 	}
 	
 	@Test
@@ -35,11 +35,12 @@ class ReportFormatterTest {
 		racers.add(racer3);
 
 		
-		String actual = formatter.format(racers);
+		String actual = formatter.format(racers,2);
 		String expected = 
-				"1. Racer3 | 3 team | 1:3.99"+System.lineSeparator()+
-				"2. Racer1 | 1 team | 1:4.5"+System.lineSeparator()+
-				"3. Racer2 | 2 team | 1:4.95"+System.lineSeparator();
+				"1.Racer3 | 3 team | 1:3.990"+System.lineSeparator()+
+				"2.Racer1 | 1 team | 1:4.500"+System.lineSeparator()+
+				"----------------------------"+System.lineSeparator()+
+				"3.Racer2 | 2 team | 1:4.950"+System.lineSeparator();
 		
 		assertEquals(expected,actual);
 				

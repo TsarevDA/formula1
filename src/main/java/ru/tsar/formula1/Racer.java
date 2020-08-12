@@ -3,25 +3,15 @@ package ru.tsar.formula1;
 import java.time.Duration;
 
 public class Racer {
-	
+
 	public String name;
 	public String team;
 	public Duration bestTime;
-	public Integer place;
-
-	public Integer getPlace() {
-		return place;
-	}
-
-	public void setPlace(Integer place) {
-		this.place = place;
-	}
 
 	public Racer(String name, String team, Duration bestTime) {
 		this.name = name;
 		this.team = team;
 		this.bestTime = bestTime;
-		this.place = 0;
 	}
 
 	@Override

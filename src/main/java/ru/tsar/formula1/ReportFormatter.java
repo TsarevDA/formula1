@@ -3,62 +3,59 @@ package ru.tsar.formula1;
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class ReportFormatter {
-	public String format(List<Racer> racers) {
+
+	public String format(List<Racer> racers, int amountTopPlaces) {
 		if (racers == null) {
 			throw new IllegalArgumentException("Agument can't be null");
 		}
 
-		final List<Racer> finalRacers = racers.stream().sorted((r1, r2) -> r1.getBestTime().compareTo(r2.getBestTime()))
-				.collect(Collectors.toList());
+		int maxNameLength = getMaxFieldLength(racers, Racer::getName);
+		int maxTeamLength = getMaxFieldLength(racers, Racer::getTeam);
 
-		finalRacers.stream().forEach(racer -> racer.setPlace(finalRacers.indexOf(racer) + 1));
-
-		Function<Racer, String> getNameFunction = Racer::getName;
-		Function<Racer, String> getTeamFunction = Racer::getTeam;
-
-		int maxNameLength = getMaxLength(racers, getNameFunction);
-		int maxTeamLength = getMaxLength(racers, getTeamFunction);
-
-		String racerFormat = "%d. %s%s | %s%s | %s";
+		String racerFormat = "%d." + "%-" + maxNameLength + "s" + " | " + "%-" + maxTeamLength + "s" + " | %s%n";
 
 		StringBuilder result = new StringBuilder();
-		finalRacers.stream().forEach(racer -> {
-			result.append(String.format(racerFormat, racer.getPlace(), racer.getName(),
-					spaceGenerate(maxNameLength - racer.getName().length()), racer.getTeam(),
-					spaceGenerate(maxTeamLength - racer.getTeam().length()),
-					formatTime(racer.getBestTime()) + System.lineSeparator()));
-			if (racer.getPlace() == 14) {
-				result.append("------------------------------------------------------------------------"
-						+ System.lineSeparator());
+
+		AtomicInteger placeCounter = new AtomicInteger(1);
+
+		racers.stream().sorted((r1, r2) -> r1.getBestTime().compareTo(r2.getBestTime())).forEach(racer -> {
+			if (placeCounter.get() == amountTopPlaces) {
+				String s = String.format(racerFormat, placeCounter.getAndIncrement(), racer.getName(), racer.getTeam(),
+						formatTime(racer.getBestTime()));
+				result.append(s);
+				for (int i = 0; i < s.length() - 1; i++) {
+					result.append("-");
+				}
+				result.append(System.lineSeparator());
+			} else {
+				result.append(String.format(racerFormat, placeCounter.getAndIncrement(), racer.getName(),
+						racer.getTeam(), formatTime(racer.getBestTime())));
 			}
 		});
-
 		return result.toString();
 	}
 
 	public static String formatTime(Duration time) {
 		String result = "";
-		result += time.toString().substring(time.toString().indexOf("T") + 1, time.toString().indexOf("M"));
-		result += ":";
-		result += time.toString().substring(time.toString().indexOf("M") + 1, time.toString().indexOf("S"));
-		return result;
-	}
-
-	public static int getMaxLength(List<Racer> racers, Function<Racer, String> func) {
-		return racers.stream().max(Comparator.comparingInt(a -> func.apply(a).length())).map(func).map(String::length)
-				.orElse(0);
-	}
-
-	public static String spaceGenerate(int amount) {
-		String result = "";
-		for (int i = 0; i < amount; i++) {
-			result += " ";
+		result += time.toMinutes() + ":";
+		if (time.getSeconds() > 59) {
+			result += (time.getSeconds() - 60) + ".";
+		} else {
+			result += time.getSeconds() + ".";
+		}
+		if (time.getNano() / 1000000 > 99) {
+			result += time.getNano() / 1000000;
+		} else {
+			result += time.getNano() / 100000;
 		}
 		return result;
 	}
 
+	public static int getMaxFieldLength(List<Racer> racers, Function<Racer, String> getter) {
+		return racers.stream().map(getter).map(String::length).max(Comparator.comparingInt(a -> a)).orElse(0);
+	}
 }

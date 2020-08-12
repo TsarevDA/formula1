@@ -8,10 +8,10 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 
 		RacerRepository repository = new RacerRepository();
-		List<Racer> racers  = repository.getRacers();
+		List<Racer> racers = repository.getRacers();
 
 		ReportFormatter formatter = new ReportFormatter();
-		System.out.println(formatter.format(racers));
+		System.out.println(formatter.format(racers, 15));
 
 	}
 }
