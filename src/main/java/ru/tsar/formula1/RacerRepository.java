@@ -1,9 +1,6 @@
 package ru.tsar.formula1;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -11,38 +8,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RacerRepository {
 
 	public List<Racer> getRacers() throws IOException {
 
-		Path startPath = Paths.get(getClass().getClassLoader().getResource("start.log").getPath().substring(1));
-		Path endPath = Paths.get(getClass().getClassLoader().getResource("end.log").getPath().substring(1));
-		Path abbreviationsPath = Paths
-				.get(getClass().getClassLoader().getResource("abbreviations.txt").getPath().substring(1));
+		FileReader reader = new FileReader();
 
-		if (startPath == null || endPath == null || abbreviationsPath == null) {
-			throw new IllegalArgumentException("One of log file does not exist");
-		}
-
-		Map<String, LocalDateTime> startTime = fileParsing(startPath);
-		Map<String, LocalDateTime> endTime = fileParsing(endPath);
+		Map<String, LocalDateTime> startTime = fileParsing(reader.read("start.log"));
+		Map<String, LocalDateTime> endTime = fileParsing(reader.read("end.log"));
 
 		Map<String, Duration> bestData = new HashMap<>();
 		endTime.forEach((k, v) -> bestData.put(k, Duration.between(startTime.get(k), endTime.get(k))));
 
-		List<String> abbreviations = Files.lines(abbreviationsPath).filter(Objects::nonNull)
-				.collect(Collectors.toList());
+		List<String> abbreviations = reader.read("abbreviations.txt").collect(Collectors.toList());
 
 		List<Racer> racers = new ArrayList<>();
 		abbreviations.stream().forEach((a) -> {
 			String[] strings = a.substring(4).split("_");
-			;
 			Racer newRacer = new Racer(strings[0], strings[1], bestData.get(a.substring(0, 3)));
 			racers.add(newRacer);
-
 		});
 		return racers;
 	}
@@ -52,9 +39,7 @@ public class RacerRepository {
 		return LocalDateTime.parse(string, formatter);
 	}
 
-	public Map<String, LocalDateTime> fileParsing(Path path) throws IOException {
-		return Files.lines(path).filter(Objects::nonNull)
-				.collect(Collectors.toMap((s) -> s.substring(0, 3), (s) -> stringToTime(s.substring(3))));
+	public Map<String, LocalDateTime> fileParsing(Stream<String> stream) {
+		return stream.collect(Collectors.toMap((s) -> s.substring(0, 3), (s) -> stringToTime(s.substring(3))));
 	}
-
 }

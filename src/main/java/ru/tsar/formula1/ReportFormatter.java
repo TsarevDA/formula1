@@ -17,12 +17,9 @@ public class ReportFormatter {
 		int maxTeamLength = getMaxFieldLength(racers, Racer::getTeam);
 
 		String racerFormat = "%d." + "%-" + maxNameLength + "s" + " | " + "%-" + maxTeamLength + "s" + " | %s%n";
-
 		StringBuilder result = new StringBuilder();
-
 		AtomicInteger placeCounter = new AtomicInteger(1);
-
-		racers.stream().sorted((r1, r2) -> r1.getBestTime().compareTo(r2.getBestTime())).forEach(racer -> {
+		racers.stream().sorted(Comparator.comparing(Racer::getBestTime)).forEach(racer -> {
 			if (placeCounter.get() == amountTopPlaces) {
 				String s = String.format(racerFormat, placeCounter.getAndIncrement(), racer.getName(), racer.getTeam(),
 						formatTime(racer.getBestTime()));
@@ -56,6 +53,6 @@ public class ReportFormatter {
 	}
 
 	public static int getMaxFieldLength(List<Racer> racers, Function<Racer, String> getter) {
-		return racers.stream().map(getter).map(String::length).max(Comparator.comparingInt(a -> a)).orElse(0);
+		return racers.stream().map(getter).map(String::length).max(Integer::compare).orElse(0);
 	}
 }
